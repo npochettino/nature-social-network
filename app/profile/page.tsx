@@ -12,6 +12,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { ProfileEditModal } from "@/components/profile-edit-modal"
+import { AvatarUpload } from "@/components/avatar-upload"
 
 interface UserPost {
   id: string
@@ -52,6 +53,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isAvatarUploadOpen, setIsAvatarUploadOpen] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
 
@@ -140,6 +142,12 @@ export default function ProfilePage() {
   const handleProfileUpdated = (updatedProfile: ProfileData) => {
     setProfileData(updatedProfile)
     // Also update the user context if needed
+  }
+
+  const handleAvatarUpdated = (avatarUrl: string) => {
+    setProfileData(prev => prev ? { ...prev, avatar_url: avatarUrl } : null)
+    // Optionally refresh the entire profile data
+    fetchProfileData()
   }
 
   const formatTimeAgo = (dateString: string) => {
@@ -233,79 +241,15 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </div>
-        ) : null}
-        {error && !profileData ? (
-          <div className="min-h-screen bg-gray-50">
-            <header className="bg-white border-b">
-              <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <Link href="/">
-                    <Button variant="ghost" size="sm">
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Back
-                    </Button>
-                  </Link>
-                  <h1 className="text-xl font-bold text-green-800">Profile</h1>
-                </div>
-              </div>
-            </header>
-
-            <main className="max-w-4xl mx-auto px-4 py-6">
-              <Alert variant="destructive" className="mb-6">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-
-              {/* Fallback Profile Display */}
-              <Card className="mb-6">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                    <Avatar className="w-24 h-24">
-                      <AvatarImage src={user?.avatar_url || "/placeholder.svg"} />
-                      <AvatarFallback className="text-2xl">
-                        {user?.username?.[0]?.toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="flex-1 text-center md:text-left">
-                      <h2 className="text-2xl font-bold text-gray-800 mb-2">{user?.username}</h2>
-                      {user?.full_name && <p className="text-lg text-gray-600 mb-4">({user.full_name})</p>}
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">-</div>
-                          <div className="text-sm text-gray-500">Posts</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">-</div>
-                          <div className="text-sm text-gray-500">Followers</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">-</div>
-                          <div className="text-sm text-gray-500">Following</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">-</div>
-                          <div className="text-sm text-gray-500">Species</div>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-center md:justify-start space-x-2">
-                        <Button onClick={() => window.location.reload()} variant="outline">
-                          Retry Loading
-                        </Button>
-                        <Link href="/upload">
-                          <Button className="bg-green-600 hover:bg-green-700">
-                            <Camera className="w-4 h-4 mr-2" />
-                            Upload Photo
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </main>
+        ) : error && !profileData ? (
+          <div className="text-center py-12">
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Retry Loading
+            </Button>
           </div>
         ) : (
           <>
@@ -313,12 +257,21 @@ export default function ProfilePage() {
             <Card className="mb-6">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage src={profileData?.avatar_url || "/placeholder.svg"} />
-                    <AvatarFallback className="text-2xl">
-                      {profileData?.username?.[0]?.toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="w-24 h-24">
+                      <AvatarImage src={profileData?.avatar_url || "/placeholder.svg"} />
+                      <AvatarFallback className="text-2xl">
+                        {profileData?.username?.[0]?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Button
+                      size="sm"
+                      className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0 bg-green-600 hover:bg-green-700"
+                      onClick={() => setIsAvatarUploadOpen(true)}
+                    >
+                      <Camera className="h-4 w-4" />
+                    </Button>
+                  </div>
 
                   <div className="flex-1 text-center md:text-left">
                     <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-2">
@@ -480,6 +433,14 @@ export default function ProfilePage() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onProfileUpdated={handleProfileUpdated}
+      />
+
+      {/* Avatar Upload Modal */}
+      <AvatarUpload
+        isOpen={isAvatarUploadOpen}
+        onClose={() => setIsAvatarUploadOpen(false)}
+        onAvatarUpdated={handleAvatarUpdated}
+        currentAvatarUrl={profileData?.avatar_url}
       />
     </div>
   )
