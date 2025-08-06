@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Heart, MessageCircle, Bookmark, Share2, Camera, Search } from "lucide-react"
+import { Heart, MessageCircle, Bookmark, Share2, Camera, Search, Users } from 'lucide-react'
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { supabase } from "@/lib/supabase"
@@ -240,6 +240,11 @@ export default function HomePage() {
             </Link>
             <Link href="/explore">
               <Button variant="ghost" size="sm">
+                <Users className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link href="/explore">
+              <Button variant="ghost" size="sm">
                 <Search className="w-4 h-4" />
               </Button>
             </Link>
@@ -288,12 +293,18 @@ export default function HomePage() {
                   {/* Post Header */}
                   <div className="p-4 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Avatar>
-                        <AvatarImage src={post.profiles.avatar_url || "/placeholder.svg"} />
-                        <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
-                      </Avatar>
+                      <Link href={`/users/${post.user_id}`}>
+                        <Avatar className="cursor-pointer hover:ring-2 hover:ring-green-500 transition-all">
+                          <AvatarImage src={post.profiles.avatar_url || "/placeholder.svg"} />
+                          <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                      </Link>
                       <div>
-                        <p className="font-semibold text-sm">{post.profiles.username}</p>
+                        <Link href={`/users/${post.user_id}`}>
+                          <p className="font-semibold text-sm hover:text-green-600 transition-colors cursor-pointer">
+                            {post.profiles.username}
+                          </p>
+                        </Link>
                         <p className="text-xs text-gray-500">{formatTimeAgo(post.created_at)}</p>
                       </div>
                     </div>
