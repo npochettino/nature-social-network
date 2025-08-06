@@ -34,7 +34,7 @@ interface Post {
 }
 
 export default function HomePage() {
-  const { user, isAuthenticated, loading: authLoading } = useAuth()
+  const { user, isAuthenticated, loading: authLoading, getAccessToken } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -108,26 +108,36 @@ export default function HomePage() {
   const handleLike = async (postId: string) => {
     if (!user) return
 
+    const accessToken = getAccessToken()
+    if (!accessToken) {
+      console.error("No access token available")
+      return
+    }
+
     try {
       const response = await fetch(`/api/posts/${postId}/like`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
       })
 
       const { liked } = await response.json()
 
-      setPosts(
-        posts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                is_liked: liked,
-                likes_count: liked ? post.likes_count + 1 : post.likes_count - 1,
-              }
-            : post,
-        ),
-      )
+      if (response.ok) {
+        setPosts(
+          posts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  is_liked: liked,
+                  likes_count: liked ? post.likes_count + 1 : post.likes_count - 1,
+                }
+              : post,
+          ),
+        )
+      }
     } catch (error) {
       console.error("Error liking post:", error)
     }
@@ -136,16 +146,26 @@ export default function HomePage() {
   const handleSave = async (postId: string) => {
     if (!user) return
 
+    const accessToken = getAccessToken()
+    if (!accessToken) {
+      console.error("No access token available")
+      return
+    }
+
     try {
       const response = await fetch(`/api/posts/${postId}/save`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
       })
 
       const { saved } = await response.json()
 
-      setPosts(posts.map((post) => (post.id === postId ? { ...post, is_saved: saved } : post)))
+      if (response.ok) {
+        setPosts(posts.map((post) => (post.id === postId ? { ...post, is_saved: saved } : post)))
+      }
     } catch (error) {
       console.error("Error saving post:", error)
     }
