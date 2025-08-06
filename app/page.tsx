@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Heart, MessageCircle, Bookmark, Share2, Camera, Search, User, Grid3X3 } from "lucide-react"
+import { Heart, MessageCircle, Bookmark, Share2, Camera, Search } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { supabase } from "@/lib/supabase"
+import { UserMenu } from "@/components/user-menu"
 
 interface Post {
   id: string
@@ -242,16 +243,7 @@ export default function HomePage() {
                 <Search className="w-4 h-4" />
               </Button>
             </Link>
-            <Link href="/collections">
-              <Button variant="ghost" size="sm">
-                <Grid3X3 className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link href="/profile">
-              <Button variant="ghost" size="sm">
-                <User className="w-4 h-4" />
-              </Button>
-            </Link>
+            <UserMenu />
           </nav>
         </div>
       </header>

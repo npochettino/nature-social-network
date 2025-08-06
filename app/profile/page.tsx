@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Settings, Grid3X3, Heart, Camera, Users, Award } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ArrowLeft, Settings, Grid3X3, Heart, Camera, Users, Award, LogOut, AlertCircle } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 
 interface UserPost {
@@ -29,7 +31,7 @@ interface UserStats {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const [userPosts, setUserPosts] = useState<UserPost[]>([])
   const [stats, setStats] = useState<UserStats>({
     posts: 0,
@@ -38,6 +40,9 @@ export default function ProfilePage() {
     speciesDiscovered: 0,
   })
   const [loading, setLoading] = useState(true)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [error, setError] = useState("")
+  const router = useRouter()
 
   useEffect(() => {
     // Simulate loading user data
@@ -86,6 +91,20 @@ export default function ProfilePage() {
     }, 1000)
   }, [])
 
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true)
+      setError("")
+      await signOut()
+      router.push("/auth/signin")
+    } catch (error) {
+      console.error("Logout error:", error)
+      setError("Failed to sign out. Please try again.")
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
   if (!user) return null
 
   return (
@@ -102,22 +121,35 @@ export default function ProfilePage() {
             </Link>
             <h1 className="text-xl font-bold text-green-800">Profile</h1>
           </div>
-          <Link href="/settings">
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
+          <div className="flex items-center space-x-2">
+            <Link href="/settings">
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+            <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              {isLoggingOut ? "Signing out..." : "Sign out"}
             </Button>
-          </Link>
+          </div>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6">
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={user.avatar || "/placeholder.svg"} />
+                <AvatarImage src={user.avatar_url || "/placeholder.svg"} />
                 <AvatarFallback className="text-2xl">{user.username[0].toUpperCase()}</AvatarFallback>
               </Avatar>
 
