@@ -65,13 +65,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
-      const { data: profile, error } = await supabase.from("profiles").select("*").eq("id", supabaseUser.id).single()
+      console.log("Fetching user profile for:", supabaseUser.id)
+      
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", supabaseUser.id)
+        .single()
 
       if (error) {
         console.error("Error fetching profile:", error)
+        
+        // If profile doesn't exist, create a basic user object
+        if (error.code === 'PGRST116') {
+          console.log("Profile not found, creating basic user object")
+          setUser({
+            id: supabaseUser.id,
+            email: supabaseUser.email!,
+            username: supabaseUser.email!.split('@')[0],
+            full_name: '',
+            avatar_url: '',
+            bio: '',
+          })
+        }
         return
       }
 
+      console.log("Profile fetched successfully:", profile)
+      
       setUser({
         id: supabaseUser.id,
         email: supabaseUser.email!,
@@ -82,6 +103,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
     } catch (error) {
       console.error("Error in fetchUserProfile:", error)
+      
+      // Fallback: create basic user object from auth data
+      setUser({
+        id: supabaseUser.id,
+        email: supabaseUser.email!,
+        username: supabaseUser.email!.split('@')[0],
+        full_name: '',
+        avatar_url: '',
+        bio: '',
+      })
     }
   }
 
