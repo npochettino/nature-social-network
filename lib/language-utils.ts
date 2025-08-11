@@ -25,10 +25,17 @@ export const detectBrowserLanguage = (): string => {
 }
 
 export const getUserPreferredLanguage = (): string => {
+  if (typeof window === "undefined") return "en"
+
   // Check localStorage first
-  const stored = localStorage.getItem("naturespot_preferred_language")
-  if (stored && SUPPORTED_LANGUAGES.some((lang) => lang.code === stored)) {
-    return stored
+  try {
+    const stored = localStorage.getItem("naturespot_preferred_language")
+    if (stored && SUPPORTED_LANGUAGES.some((lang) => lang.code === stored)) {
+      return stored
+    }
+  } catch (error) {
+    // Handle localStorage access errors gracefully
+    console.warn("Could not access localStorage for language preference:", error)
   }
 
   // Fall back to browser detection
