@@ -549,6 +549,7 @@ function AuthenticatedFeed() {
   const { user, isAuthenticated, loading: authLoading, getAccessToken } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -557,32 +558,44 @@ function AuthenticatedFeed() {
   }, [authLoading, user, isAuthenticated])
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+
     const handleVisibilityChange = () => {
       if (!document.hidden && isAuthenticated && !authLoading) {
-        fetchPosts()
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          fetchPosts(true)
+        }, 500)
       }
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange)
 
-    // Also listen for focus events as a fallback
     const handleFocus = () => {
       if (isAuthenticated && !authLoading) {
-        fetchPosts()
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          fetchPosts(true)
+        }, 500)
       }
     }
 
     window.addEventListener("focus", handleFocus)
 
     return () => {
+      clearTimeout(timeoutId)
       document.removeEventListener("visibilitychange", handleVisibilityChange)
       window.removeEventListener("focus", handleFocus)
     }
   }, [isAuthenticated, authLoading])
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true)
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      } else {
+        setIsRefreshing(true)
+      }
 
       const query = supabase
         .from("posts")
@@ -600,21 +613,21 @@ function AuthenticatedFeed() {
 
       if (error) {
         console.error("Error fetching posts:", error)
+        if (!isBackgroundRefresh) {
+          setPosts([])
+        }
         return
       }
 
-      // If user is authenticated, check likes and saves
       if (user && postsData) {
         const postIds = postsData.map((post) => post.id)
 
-        // Get user's likes
         const { data: likes } = await supabase
           .from("likes")
           .select("post_id")
           .eq("user_id", user.id)
           .in("post_id", postIds)
 
-        // Get user's saves
         const { data: saves } = await supabase
           .from("saved_posts")
           .select("post_id")
@@ -636,8 +649,15 @@ function AuthenticatedFeed() {
       }
     } catch (error) {
       console.error("Error in fetchPosts:", error)
+      if (!isBackgroundRefresh) {
+        setPosts([])
+      }
     } finally {
-      setLoading(false)
+      if (!isBackgroundRefresh) {
+        setLoading(false)
+      } else {
+        setIsRefreshing(false)
+      }
     }
   }
 
@@ -730,12 +750,10 @@ function AuthenticatedFeed() {
     )
   }
 
-  // Show landing page for non-authenticated users
   if (!isAuthenticated) {
     return <LandingPage />
   }
 
-  // Show authenticated user feed
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
