@@ -22,7 +22,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
     }
 
-    const { username, full_name, bio } = await request.json()
+    const { username, full_name, bio, preferred_language } = await request.json()
 
     // Check if username is already taken (if changed)
     if (username) {
@@ -45,6 +45,7 @@ export async function PUT(request: NextRequest) {
         username: username || undefined,
         full_name: full_name || undefined,
         bio: bio || undefined,
+        preferred_language: preferred_language || undefined,
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id)

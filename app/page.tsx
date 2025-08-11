@@ -11,7 +11,6 @@ import {
   Heart,
   MessageCircle,
   Bookmark,
-  Share2,
   Camera,
   Search,
   Users,
@@ -27,6 +26,7 @@ import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { supabase } from "@/lib/supabase"
 import { UserMenu } from "@/components/user-menu"
+import { PostCard } from "@/components/post-card"
 
 interface Post {
   id: string
@@ -803,97 +803,13 @@ function AuthenticatedFeed() {
         ) : (
           <div className="space-y-6">
             {posts.map((post) => (
-              <Card key={post.id} className="overflow-hidden">
-                <CardContent className="p-0">
-                  {/* Post Header */}
-                  <div className="p-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Link href={`/users/${post.user_id}`}>
-                        <Avatar className="cursor-pointer hover:ring-2 hover:ring-green-500 transition-all">
-                          <AvatarImage src={post.profiles.avatar_url || "/placeholder.svg"} />
-                          <AvatarFallback>{post.profiles.username[0].toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                      </Link>
-                      <div>
-                        <Link href={`/users/${post.user_id}`}>
-                          <p className="font-semibold text-sm hover:text-green-600 transition-colors cursor-pointer">
-                            {post.profiles.username}
-                          </p>
-                        </Link>
-                        <p className="text-xs text-gray-500">{formatTimeAgo(post.created_at)}</p>
-                      </div>
-                    </div>
-                    <Badge
-                      variant={
-                        post.category === "bird" ? "default" : post.category === "animal" ? "secondary" : "outline"
-                      }
-                    >
-                      {post.category}
-                    </Badge>
-                  </div>
-
-                  {/* Post Image */}
-                  <div className="relative">
-                    <img
-                      src={post.image_url || "/placeholder.svg"}
-                      alt={post.species_name}
-                      className="w-full h-64 sm:h-80 object-cover"
-                    />
-                  </div>
-
-                  {/* Species Information */}
-                  <div className="p-4 bg-green-50 border-t">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-bold text-green-800">{post.species_name}</h3>
-                        <p className="text-sm italic text-green-600">{post.scientific_name}</p>
-                      </div>
-                      {post.conservation_status && (
-                        <Badge variant={post.conservation_status === "Endangered" ? "destructive" : "secondary"}>
-                          {post.conservation_status}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-700 mb-2">{post.description}</p>
-                    <p className="text-xs text-gray-600">
-                      <strong>Habitat:</strong> {post.habitat}
-                    </p>
-                  </div>
-
-                  {/* Post Actions */}
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleLike(post.id)}
-                          className={post.is_liked ? "text-red-500" : ""}
-                        >
-                          <Heart className={`w-5 h-5 mr-1 ${post.is_liked ? "fill-current" : ""}`} />
-                          {post.likes_count}
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <MessageCircle className="w-5 h-5 mr-1" />
-                          {post.comments_count}
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Share2 className="w-5 h-5" />
-                        </Button>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSave(post.id)}
-                        className={post.is_saved ? "text-blue-500" : ""}
-                      >
-                        <Bookmark className={`w-5 h-5 ${post.is_saved ? "fill-current" : ""}`} />
-                      </Button>
-                    </div>
-                    {post.caption && <p className="text-sm">{post.caption}</p>}
-                  </div>
-                </CardContent>
-              </Card>
+              <PostCard
+                key={post.id}
+                post={post}
+                onLike={handleLike}
+                onSave={handleSave}
+                formatTimeAgo={formatTimeAgo}
+              />
             ))}
           </div>
         )}
