@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -36,32 +36,119 @@ export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
-      setIdentification(null)
-      setError("")
+  useEffect(() => {
+    return () => {
+      // Cleanup preview URL to prevent memory leaks
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+      // Reset loading states when component unmounts
+      setIsAnalyzing(false)
+      setIsUploading(false)
     }
-  }
+  }, [previewUrl])
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const file = e.dataTransfer.files[0]
-    if (file && file.type.startsWith("image/")) {
-      setSelectedFile(file)
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
-      setIdentification(null)
-      setError("")
+  const validateFile = useCallback((file: File): string | null => {
+    // Check file type
+    if (!file.type.startsWith("image/")) {
+      return "Please select an image file (JPG, PNG, GIF, etc.)"
     }
-  }
 
-  const handleDragOver = (e: React.DragEvent) => {
+    // Check file size (max 10MB for mobile compatibility)
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      return "File size must be less than 10MB"
+    }
+
+    // Check if file is corrupted (basic check)
+    if (file.size === 0) {
+      return "Selected file appears to be empty or corrupted"
+    }
+
+    return null
+  }, [])
+
+  const processFile = useCallback(
+    (file: File) => {
+      const validationError = validateFile(file)
+      if (validationError) {
+        setError(validationError)
+        return
+      }
+
+      // Clean up previous preview URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+
+      try {
+        // Create new preview URL
+        const url = URL.createObjectURL(file)
+
+        // Test if the URL is valid by creating an image element
+        const testImage = new Image()
+        testImage.onload = () => {
+          // Image loaded successfully, set the preview
+          setSelectedFile(file)
+          setPreviewUrl(url)
+          setIdentification(null)
+          setError("")
+        }
+        testImage.onerror = () => {
+          // Image failed to load, show error
+          URL.revokeObjectURL(url)
+          setError("Unable to process the selected image. Please try a different file.")
+        }
+        testImage.src = url
+      } catch (err) {
+        console.error("Error processing file:", err)
+        setError("Failed to process the selected image. Please try again.")
+      }
+    },
+    [previewUrl, validateFile],
+  )
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (file) {
+        processFile(file)
+      }
+      if (e.target) {
+        e.target.value = ""
+      }
+    },
+    [processFile],
+  )
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      const file = e.dataTransfer.files[0]
+      if (file) {
+        processFile(file)
+      }
+    },
+    [processFile],
+  )
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
-  }
+  }, [])
+
+  const handleChangePhoto = useCallback(() => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+    setSelectedFile(null)
+    setPreviewUrl("")
+    setIdentification(null)
+    setError("")
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }, [previewUrl])
 
   const analyzeImage = async () => {
     if (!selectedFile) return
@@ -150,6 +237,10 @@ export default function UploadPage() {
       console.log("Post created successfully:", result)
       setUploadSuccess(true)
 
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+
       // Redirect to home after success
       setTimeout(() => {
         router.push("/")
@@ -230,6 +321,7 @@ export default function UploadPage() {
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
+                    capture="environment"
                     onChange={handleFileSelect}
                     className="hidden"
                   />
@@ -241,17 +333,16 @@ export default function UploadPage() {
                       src={previewUrl || "/placeholder.svg"}
                       alt="Preview"
                       className="w-full h-64 object-cover rounded-lg"
+                      onError={() => {
+                        setError("Failed to display image preview. Please try a different file.")
+                        handleChangePhoto()
+                      }}
                     />
                     <Button
                       variant="secondary"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={() => {
-                        setSelectedFile(null)
-                        setPreviewUrl("")
-                        setIdentification(null)
-                        setError("")
-                      }}
+                      onClick={handleChangePhoto}
                     >
                       Change Photo
                     </Button>

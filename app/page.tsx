@@ -1,11 +1,28 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Heart, MessageCircle, Bookmark, Share2, Camera, Search, Users, Sparkles, Eye, Zap, Globe, ArrowRight, Star, CheckCircle } from 'lucide-react'
+import {
+  Heart,
+  MessageCircle,
+  Bookmark,
+  Share2,
+  Camera,
+  Search,
+  Users,
+  Sparkles,
+  Eye,
+  Zap,
+  Globe,
+  ArrowRight,
+  Star,
+  CheckCircle,
+} from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { supabase } from "@/lib/supabase"
@@ -44,9 +61,7 @@ function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
     <Card className="text-center hover:shadow-lg transition-shadow duration-300">
       <CardContent className="p-6">
-        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          {icon}
-        </div>
+        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">{icon}</div>
         <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
         <p className="text-gray-600 text-sm">{description}</p>
       </CardContent>
@@ -145,28 +160,35 @@ function LandingPage() {
             <Sparkles className="w-4 h-4 text-green-600" />
             <span className="text-sm font-medium text-green-700">AI-Powered Species Identification</span>
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight">
             Discover the
             <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent block">
               Wonders of Nature
             </span>
           </h1>
-          
+
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Join a community of nature enthusiasts. Share your discoveries, identify species with AI, 
-            and explore the incredible biodiversity around us.
+            Join a community of nature enthusiasts. Share your discoveries, identify species with AI, and explore the
+            incredible biodiversity around us.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Link href="/auth/signup">
-              <Button size="lg" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl px-8 py-3 text-lg">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl px-8 py-3 text-lg"
+              >
                 <Camera className="w-5 h-5 mr-2" />
                 Start Exploring
               </Button>
             </Link>
             <Link href="#features">
-              <Button variant="outline" size="lg" className="border-green-200 text-green-700 hover:bg-green-50 px-8 py-3 text-lg">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-green-200 text-green-700 hover:bg-green-50 px-8 py-3 text-lg bg-transparent"
+              >
                 Learn More
               </Button>
             </Link>
@@ -198,9 +220,7 @@ function LandingPage() {
       <section id="features" className="py-20 px-4 bg-white/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Everything You Need to Explore Nature
-            </h2>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">Everything You Need to Explore Nature</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Powerful tools and features designed to enhance your nature discovery journey
             </p>
@@ -246,9 +266,7 @@ function LandingPage() {
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-800 mb-4">
-                Recent Discoveries
-              </h2>
+              <h2 className="text-4xl font-bold text-gray-800 mb-4">Recent Discoveries</h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                 See what our community has been discovering and sharing
               </p>
@@ -301,7 +319,7 @@ function LandingPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
@@ -311,18 +329,12 @@ function LandingPage() {
                                 {post.profiles.username[0].toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-sm font-medium text-gray-700">
-                              {post.profiles.username}
-                            </span>
+                            <span className="text-sm font-medium text-gray-700">{post.profiles.username}</span>
                           </div>
-                          <span className="text-xs text-gray-500">
-                            {formatTimeAgo(post.created_at)}
-                          </span>
+                          <span className="text-xs text-gray-500">{formatTimeAgo(post.created_at)}</span>
                         </div>
 
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                          {post.description}
-                        </p>
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">{post.description}</p>
 
                         <div className="flex items-center justify-between text-sm text-gray-500">
                           <div className="flex items-center space-x-4">
@@ -336,7 +348,7 @@ function LandingPage() {
                             </div>
                           </div>
                           {post.conservation_status && (
-                            <Badge 
+                            <Badge
                               variant={post.conservation_status === "Endangered" ? "destructive" : "secondary"}
                               className="text-xs"
                             >
@@ -353,7 +365,10 @@ function LandingPage() {
 
             <div className="text-center mt-12">
               <Link href="/auth/signup">
-                <Button size="lg" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg"
+                >
                   Join to See More
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -367,12 +382,8 @@ function LandingPage() {
       <section className="py-20 px-4 bg-gradient-to-r from-green-50 to-emerald-50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              How It Works
-            </h2>
-            <p className="text-xl text-gray-600">
-              Get started in just three simple steps
-            </p>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
+            <p className="text-xl text-gray-600">Get started in just three simple steps</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -381,9 +392,7 @@ function LandingPage() {
                 <Camera className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-3">1. Capture</h3>
-              <p className="text-gray-600">
-                Take a photo of any bird, animal, or plant you encounter in nature
-              </p>
+              <p className="text-gray-600">Take a photo of any bird, animal, or plant you encounter in nature</p>
             </div>
 
             <div className="text-center">
@@ -391,9 +400,7 @@ function LandingPage() {
                 <Zap className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-3">2. Identify</h3>
-              <p className="text-gray-600">
-                Our AI instantly identifies the species and provides detailed information
-              </p>
+              <p className="text-gray-600">Our AI instantly identifies the species and provides detailed information</p>
             </div>
 
             <div className="text-center">
@@ -412,22 +419,29 @@ function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to Start Your Nature Journey?
-          </h2>
+          <h2 className="text-4xl font-bold mb-6">Ready to Start Your Nature Journey?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of nature enthusiasts who are already discovering and sharing the wonders of our natural world.
+            Join thousands of nature enthusiasts who are already discovering and sharing the wonders of our natural
+            world.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Link href="/auth/signup">
-              <Button size="lg" variant="secondary" className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="bg-white text-green-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
+              >
                 <Camera className="w-5 h-5 mr-2" />
                 Create Free Account
               </Button>
             </Link>
             <Link href="/auth/signin">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg bg-transparent"
+              >
                 Sign In
               </Button>
             </Link>
@@ -480,28 +494,48 @@ function LandingPage() {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/auth/signup" className="hover:text-white transition-colors">Get Started</Link></li>
-                <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><span className="hover:text-white transition-colors cursor-pointer">Mobile App</span></li>
-                <li><span className="hover:text-white transition-colors cursor-pointer">API</span></li>
+                <li>
+                  <Link href="/auth/signup" className="hover:text-white transition-colors">
+                    Get Started
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#features" className="hover:text-white transition-colors">
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <span className="hover:text-white transition-colors cursor-pointer">Mobile App</span>
+                </li>
+                <li>
+                  <span className="hover:text-white transition-colors cursor-pointer">API</span>
+                </li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><span className="hover:text-white transition-colors cursor-pointer">Help Center</span></li>
-                <li><span className="hover:text-white transition-colors cursor-pointer">Community</span></li>
-                <li><span className="hover:text-white transition-colors cursor-pointer">Contact Us</span></li>
-                <li><span className="hover:text-white transition-colors cursor-pointer">Privacy Policy</span></li>
+                <li>
+                  <span className="hover:text-white transition-colors cursor-pointer">Help Center</span>
+                </li>
+                <li>
+                  <span className="hover:text-white transition-colors cursor-pointer">Community</span>
+                </li>
+                <li>
+                  <span className="hover:text-white transition-colors cursor-pointer">Contact Us</span>
+                </li>
+                <li>
+                  <span className="hover:text-white transition-colors cursor-pointer">Privacy Policy</span>
+                </li>
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>&copy; 2024 NatureSpot. Made with ❤️ for nature lovers worldwide.</p>
           </div>
@@ -511,7 +545,7 @@ function LandingPage() {
   )
 }
 
-export default function HomePage() {
+function AuthenticatedFeed() {
   const { user, isAuthenticated, loading: authLoading, getAccessToken } = useAuth()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -521,6 +555,30 @@ export default function HomePage() {
       fetchPosts()
     }
   }, [authLoading, user, isAuthenticated])
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isAuthenticated && !authLoading) {
+        fetchPosts()
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    // Also listen for focus events as a fallback
+    const handleFocus = () => {
+      if (isAuthenticated && !authLoading) {
+        fetchPosts()
+      }
+    }
+
+    window.addEventListener("focus", handleFocus)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("focus", handleFocus)
+    }
+  }, [isAuthenticated, authLoading])
 
   const fetchPosts = async () => {
     try {
@@ -842,4 +900,8 @@ export default function HomePage() {
       </main>
     </div>
   )
+}
+
+export default function HomePage() {
+  return <AuthenticatedFeed />
 }
